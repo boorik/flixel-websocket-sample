@@ -1,0 +1,12 @@
+-cp source
+-main mp.Server
+
+--each
+
+-js bin/server/js/server.js
+-lib hxnodejs
+
+--next 
+
+-cpp bin/server/cpp
+-lib haxe-ws
