@@ -1,9 +1,9 @@
 -cp source
--main mp.GameServer
+-main mp.MasterServer
 
 --each
 
--neko bin/server/neko/server.n
+-neko bin/masterserver/neko/server.n
 -lib haxe-ws
 #-js bin/server/js/server.js
 #-lib haxe-ws
@@ -11,5 +11,5 @@
 
 --next 
 
--cpp bin/server/cpp
+-cpp bin/masterserver/cpp
 -lib haxe-ws
