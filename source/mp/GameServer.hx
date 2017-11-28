@@ -2,6 +2,7 @@ package mp;
 
 import mp.Message;
 import mp.Command;
+import mp.MasterCommand;
 import game.*;
 import haxe.*;
 
@@ -19,11 +20,28 @@ class GameServer {
 		var clients:Array<Client> = [];
 		var world = new World();
 		var port = 8888;
-		var ws = WebSocketServer.create('0.0.0.0',8888,5000,true);
 		var cpt = 0;
+		//master server connection
+		var msc = WebSocket.create('ws://127.0.0.1:9999');
+		var launchTime = Timer.stamp();
+		var running = .0;
+		// while(msc.readyState != ReadyState.Open && cpt < 200)
+		// {
+		// 	log(Std.string(msc.readyState));
+		// 	Sys.sleep(0.1);
+		// 	cpt++;
+		// }
+		msc.onopen = function(){
+			log('registering the game');
+			msc.sendString(Serializer.run(Register("test game",0,10)));
+		}
+		var ws = WebSocketServer.create('0.0.0.0',8888,5000,true);
+		msc.onmessageString = function(msg){
+			log(msg);
+		}
 		while (true) {
 			try{
-			
+				msc.process();
 				var websocket = ws.accept();
 				if (websocket != null) 
 				{

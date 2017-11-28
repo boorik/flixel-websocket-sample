@@ -1,6 +1,6 @@
 package game;
 
-typedef GameDesc
+typedef GameDesc =
 {
     var name:String;
     var host:String;

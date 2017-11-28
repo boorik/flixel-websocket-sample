@@ -2,6 +2,8 @@ package mp;
 
 import mp.Message;
 import mp.MasterCommand;
+import mp.MasterMessage;
+
 import game.*;
 import haxe.*;
 
@@ -17,10 +19,10 @@ class MasterServer {
 
 		// websocket server
 		var clients:Array<Client> = [];
-		var games:Array<Game> = [];
+		var games:Array<GameDesc> = [];
 		var world = new World();
 		var port = 8888;
-		var ws = WebSocketServer.create('0.0.0.0',8585,5000,true);
+		var ws = WebSocketServer.create('0.0.0.0',9999,5000,true);
 		var cpt = 0;
 		while (true) {
 			try{
@@ -29,10 +31,10 @@ class MasterServer {
 				if (websocket != null) 
 				{
 					var client = new Client(websocket);
-					//websocket.onopen = onopen;
+					websocket.onopen = function(){log('hello client');};
 					websocket.onclose = function() {
-						if(client.player != null)
-							world.remove(client.player);
+						if(client.game != null)
+							games.remove(client.game);
 						clients.remove(client);
 					};
 					websocket.onerror = function(msg:String)
@@ -51,7 +53,7 @@ class MasterServer {
 									log('${websocket.host} register a game');
 									client.game = {
 										name:name,
-										host:websocket.host;
+										host:websocket.host,
 										port:8888,
 										playerNumber:playerNumber,
 										maxPlayer:maxPlayer,
@@ -65,7 +67,7 @@ class MasterServer {
 									client.game.playerNumber = playerNumber;
 									client.game.maxPlayer = maxPlayer;
 									client.game.lastUpdateTime = Timer.stamp();
-									
+
 								case List:
 									var msg = Serializer.run(GList(games));
 									client.connection.sendString(msg);
@@ -92,6 +94,7 @@ class MasterServer {
 					var t = current - g.lastUpdateTime;
 					if(t > 20000)
 					{
+						log("game too old removing");
 						unavailables.push(g);
 					}
 				}

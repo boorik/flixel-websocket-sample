@@ -34,7 +34,7 @@ class MenuState extends FlxState
 	function playMulti()
 	{
 		Globals.online = true;
-		FlxG.switchState(new PlayState());
+		FlxG.switchState(new ServerBrowserState());
 	}
 
 	override public function update(elapsed:Float):Void
@@ -42,7 +42,7 @@ class MenuState extends FlxState
 
 		if(FlxG.keys.justPressed.ESCAPE)
 		{
-			openfl.Lib.close();
+			Sys.exit(0);
 		}
 		super.update(elapsed);
 	}

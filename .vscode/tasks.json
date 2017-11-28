@@ -97,7 +97,6 @@
             "taskName": "neko debug",
             "suppressTaskName": true,
             "args": ["neko", "-Ddebug"],
-            "isBuildCommand": true,
             "problemMatcher": {
                 "owner": "haxe",
                 "pattern": {
@@ -132,6 +131,7 @@
         },
         {
             "taskName": "neko debug -Dnext",
+            "isBuildCommand": true,
             "suppressTaskName": true,
             "args": ["neko", "-Ddebug", "-Dnext"],
             "problemMatcher": {
