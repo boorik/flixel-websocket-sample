@@ -4,6 +4,8 @@ package game;
 class World {
 	// list of active game objects
 	public var objects:Array<Object> = [];
+	public var playerNumber(default,null) = 0;
+	public var maxPlayer = 10;
 	
 	// objects spawns within this rectangle
 	var size:{width:Int, height:Int};
@@ -31,6 +33,7 @@ class World {
 	}
 
 	public function createPlayer() {
+		playerNumber++;
 		return insert({
 			id: count++,
 			type: Player,
@@ -110,8 +113,17 @@ class World {
 			// actually remove the objects
 			remove(object);
 			
-			// replenish food
-			if(object.type == Food) createFood();
+			switch(object.type)
+			{
+				case Player :
+					playerNumber--;
+			
+				case Food : 
+					// replenish food
+					createFood();
+					
+				default:
+			}
 			
 		}
 

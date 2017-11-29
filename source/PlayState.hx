@@ -45,6 +45,8 @@ class PlayState extends FlxState
 					case Joined(id): 
 						trace('Game joined, player id: $id');
 						this.id = id;
+					case Full:
+						trace('Unable to join, the game is full');
 					case State(state): 
 						this.state = state;
 				}

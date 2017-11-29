@@ -3,7 +3,7 @@
 
 --each
 
--neko bin/masterserver/neko/server.n
+-neko bin/masterserver/neko/masterserver.n
 -lib haxe-ws
 #-js bin/server/js/server.js
 #-lib haxe-ws

@@ -3,6 +3,7 @@ package mp;
 import mp.Message;
 import mp.Command;
 import mp.MasterCommand;
+import mp.MasterMessage;
 import game.*;
 import haxe.*;
 
@@ -16,32 +17,74 @@ class GameServer {
 	static function main() {
 		Sys.println("built at " + BuildInfo.getBuildDate());
 
+		var masterRefreshRate = 5.0; //refresh master server every 5 sec
+
 		// websocket server
 		var clients:Array<Client> = [];
 		var world = new World();
 		var port = 8888;
 		var cpt = 0;
+		//game server sockets
+		var ws = WebSocketServer.create('0.0.0.0',8888,5000,true);
+
 		//master server connection
 		var msc = WebSocket.create('ws://127.0.0.1:9999');
-		var launchTime = Timer.stamp();
+		var masterUpdateTime = .0;
 		var running = .0;
-		// while(msc.readyState != ReadyState.Open && cpt < 200)
-		// {
-		// 	log(Std.string(msc.readyState));
-		// 	Sys.sleep(0.1);
-		// 	cpt++;
-		// }
+		var mscError = false;
+
 		msc.onopen = function(){
 			log('registering the game');
-			msc.sendString(Serializer.run(Register("test game",0,10)));
+			msc.sendString(Serializer.run(Register("test game", 0, world.maxPlayer)));
 		}
-		var ws = WebSocketServer.create('0.0.0.0',8888,5000,true);
+
+		msc.onerror = function(msg:String){
+			log('ERROR : issue with master server \n$msg');
+			mscError = true;
+		}
+
+		msc.onclose = function(){
+			log("ERROR : connection to master server lost");
+		}
+		
 		msc.onmessageString = function(msg){
-			log(msg);
+			var command:MasterMessage;
+			try{
+				command = Unserializer.run(msg);
+			}
+			catch(e:Dynamic)
+			{
+				log('ERROR : unexpected message: $msg');
+				return;
+			}
+			switch(command)
+			{
+				case Registered :
+					log("registered to master server");
+					masterUpdateTime = Timer.stamp();
+
+				case Updated :
+					log("master server updated");
+					masterUpdateTime = Timer.stamp();
+				
+				default:
+					log('ERROR : not supposed to recieve $command message');
+			}
 		}
 		while (true) {
 			try{
-				msc.process();
+				if(!mscError)
+				{
+					try{
+						msc.process();
+					}
+					catch(e:Dynamic)
+					{
+						log('ERROR : Unable to communicate with master server,\n$e');
+						mscError = true;
+					}
+				}
+
 				var websocket = ws.accept();
 				if (websocket != null) 
 				{
@@ -55,22 +98,36 @@ class GameServer {
 					websocket.onerror = function(msg:String)
 					{
 						var host = cast(websocket,WebSocketGeneric).host;
-						var date = Date.now();
-    					var str = DateTools.format(date,"%Y-%m-%d %H:%M:%S");
 						log('${host} $msg');
 					};
 
 					websocket.onmessageString = function(msg:String)
 						{
-							var command:Command = Unserializer.run(msg);
+							var command:Command;
+							try{
+								command = Unserializer.run(msg);
+							}
+							catch(e:Dynamic)
+							{
+								log('ERROR : unexpected message: $msg');
+								return;
+							}
 							switch command {
 								case Join:
-									log('${websocket.host} joined the game');
-									if(client.player == null)
-										client.player = world.createPlayer();
+									if(world.playerNumber < world.maxPlayer)
+									{
+										log('${websocket.host} joined the game');
+										if(client.player == null)
+											client.player = world.createPlayer();
 
-									var msg = Serializer.run(Joined(client.player.id));
-									client.connection.sendString(msg);
+										var msg = Serializer.run(Joined(client.player.id));
+										client.connection.sendString(msg);
+									}
+									else
+									{
+										var msg = Serializer.run(Full);
+										client.connection.sendString(msg);
+									}
 
 								case SetDirection(dir):
 									if(client.player != null) client.player.dir = dir;
@@ -97,6 +154,14 @@ class GameServer {
 					
 				Sys.sleep(0.032);
 
+				//keep master server in touch
+				if(masterUpdateTime != .0 && (Timer.stamp() - masterUpdateTime > masterRefreshRate))
+				{
+					masterUpdateTime = .0;
+					msc.sendString(Serializer.run(Update(world.playerNumber, world.maxPlayer)));
+				}
+
+
 				//game loop
 				//if(cpt++ == 32)
 				//{
@@ -111,7 +176,7 @@ class GameServer {
 						}
 					}
 
-					// boardcast the game state
+					// broadcast the game state
 					var msg = Serializer.run(State(state));
 					for(client in clients)
 						try {
@@ -129,7 +194,7 @@ class GameServer {
 	{
 		var date = Date.now();
 		var dateStr = DateTools.format(date,"%Y-%m-%d %H:%M:%S");
-		trace('[$dateStr] $str');
+		Sys.println('[$dateStr] $str');
 	}
 }
 

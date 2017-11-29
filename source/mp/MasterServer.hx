@@ -33,8 +33,10 @@ class MasterServer {
 					var client = new Client(websocket);
 					websocket.onopen = function(){log('hello client');};
 					websocket.onclose = function() {
+						log('server disconnected : ${client.game}');
 						if(client.game != null)
 							games.remove(client.game);
+						client.game = null;
 						clients.remove(client);
 					};
 					websocket.onerror = function(msg:String)
@@ -60,13 +62,15 @@ class MasterServer {
 										lastUpdateTime:Timer.stamp()
 									};
 									games.push(client.game);
-									var msg = Serializer.run(GList(games));
+									var msg = Serializer.run(Registered);
 									client.connection.sendString(msg);
 
 								case Update(playerNumber, maxPlayer):
 									client.game.playerNumber = playerNumber;
 									client.game.maxPlayer = maxPlayer;
 									client.game.lastUpdateTime = Timer.stamp();
+									var msg = Serializer.run(Updated);
+									client.connection.sendString(msg);
 
 								case List:
 									var msg = Serializer.run(GList(games));
@@ -92,7 +96,7 @@ class MasterServer {
 				for(g in games)
 				{
 					var t = current - g.lastUpdateTime;
-					if(t > 20000)
+					if(t > 30)
 					{
 						log("game too old removing");
 						unavailables.push(g);
@@ -113,7 +117,7 @@ class MasterServer {
 	{
 		var date = Date.now();
 		var dateStr = DateTools.format(date,"%Y-%m-%d %H:%M:%S");
-		trace('[$dateStr] $str');
+		Sys.println('[$dateStr] $str');
 	}
 }
 
