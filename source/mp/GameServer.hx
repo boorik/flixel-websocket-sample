@@ -28,7 +28,7 @@ class GameServer {
 		var ws = WebSocketServer.create('0.0.0.0',8888,5000,true);
 
 		//master server connection
-		var msc = WebSocket.create('ws://127.0.0.1:9999');
+		var msc = WebSocket.create('ws://pony.boorik.com:9999');
 		var masterUpdateTime = .0;
 		var running = .0;
 		var mscError = false;
@@ -64,7 +64,7 @@ class GameServer {
 					masterUpdateTime = Timer.stamp();
 
 				case Updated :
-					log("master server updated");
+					//log("master server updated");
 					masterUpdateTime = Timer.stamp();
 				
 				default:
@@ -116,7 +116,8 @@ class GameServer {
 								case Join:
 									if(world.playerNumber < world.maxPlayer)
 									{
-										log('${websocket.host} joined the game');
+										var peer = cast(websocket,WebSocketGeneric).socket.peer().host.toString();
+										log('$peer joined the game');
 										if(client.player == null)
 											client.player = world.createPlayer();
 

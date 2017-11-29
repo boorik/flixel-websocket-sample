@@ -4,7 +4,6 @@
 --each
 
 -neko bin/gameserver/neko/gameserver.n
--lib haxe-ws
 #-js bin/server/js/server.js
 #-lib haxe-ws
 #-lib hxnodejs
@@ -12,4 +11,3 @@
 --next 
 
 -cpp bin/gameserver/cpp
--lib haxe-ws

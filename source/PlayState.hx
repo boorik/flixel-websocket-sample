@@ -198,7 +198,10 @@ class PlayState extends FlxState
 	{
 		trace('destroying PlayState');
 		if(ws != null)
+		{
 			ws.close();
+			ws = null;
+		}
 		super.destroy();
 	}
 }

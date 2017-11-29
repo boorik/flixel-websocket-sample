@@ -17,6 +17,7 @@ class ServerBrowserState extends FlxState
 {
     var statusText:FlxText;
     var ws:WebSocket;
+    var wsError = false;
     var posY = 300;
 	override public function create():Void
 	{
@@ -25,11 +26,14 @@ class ServerBrowserState extends FlxState
         statusText = new FlxText(0,0,FlxG.width,"Connecting to master server...");
         statusText.setFormat(20,flixel.util.FlxColor.WHITE);
         add(statusText);
-        ws = WebSocket.create('ws://localhost:9999');
+        ws = WebSocket.create('ws://pony.boorik.com:9999');
         ws.onopen = function(){
             log("getting game list...");
             ws.sendString(haxe.Serializer.run(List));
         }
+        ws.onerror = function (msg:String){
+            log("ERRROR : Unable to communicate with master server\nType ESC key to go back.");
+        };
         ws.onmessageString = function(msg:String){
             var masterMessage:MasterMessage;
             try{
@@ -47,22 +51,14 @@ class ServerBrowserState extends FlxState
                     for(g in list)
                     {
                         log(Std.string(g));
-                        var gameButton = new FlxButton(0,posY,'${g.name} ${g.playerNumber}/${g.maxPlayer}', function(){
+                        var gameButton = tools.UITools.getButton(0,posY,300,50,'${g.name} ${g.playerNumber}/${g.maxPlayer}', function(){
                             Globals.online = true;
                             Globals.game = g;
                             FlxG.switchState(new PlayState());
                         });
-                        gameButton.setGraphicSize(300,100);
-                        gameButton.label.setFormat(20);
-                        gameButton.label.fieldWidth = 300;
-                        gameButton.label.autoSize = true;
-                        gameButton.label.borderColor = FlxColor.RED;
-                        gameButton.label.borderStyle = flixel.text.FlxTextBorderStyle.OUTLINE_FAST;
-                        gameButton.label.borderSize = 2;
                         gameButton.screenCenter(flixel.util.FlxAxes.X);
-                        gameButton.updateHitbox();
                         add(gameButton);
-                        posY += 40;
+                        posY += 60;
 
                     }
                 default :
@@ -70,6 +66,16 @@ class ServerBrowserState extends FlxState
             }
         };
 	}
+    
+    override public function destroy()
+    {
+        if(ws != null)
+        {
+            ws.close();
+            ws = null;
+        }
+        super.destroy();
+    }
 
     function log(msg:String)
     {
@@ -90,13 +96,20 @@ class ServerBrowserState extends FlxState
 
 	override public function update(elapsed:Float):Void
 	{
-        ws.process();
-        #if !web
+        if(!wsError)
+        {
+            try{
+            ws.process();
+            }
+            catch(e:Dynamic)
+            {
+            wsError = true; 
+            }
+        }
 		if(FlxG.keys.justPressed.ESCAPE)
 		{
-            Sys.exit(0);
+            FlxG.switchState(new MenuState());
 		}
-        #end
 		super.update(elapsed);
 	}
 }

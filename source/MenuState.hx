@@ -7,6 +7,9 @@ import flixel.text.FlxText;
 import flixel.ui.FlxButton;
 import flixel.addons.ui.FlxButtonPlus;
 import flixel.math.FlxMath;
+import flixel.addons.ui.FlxUIButton;
+import flixel.addons.ui.FlxUI9SliceSprite;
+
 
 class MenuState extends FlxState
 {
@@ -14,12 +17,13 @@ class MenuState extends FlxState
 	{
 		super.create();
 
-		var soloButton:FlxButtonPlus = new FlxButtonPlus(0, 0, playSolo, "Solo game", 300, 30);
+		var soloButton = tools.UITools.getButton(0,0,300,50,"Play solo", playSolo);
 		soloButton.screenCenter(flixel.util.FlxAxes.X);
 		soloButton.y = 500;
 		add(soloButton);
+		trace(soloButton.label.y);
 
-		var multiButton:FlxButton = new FlxButton(0, 0, "Online game", playMulti);
+		var multiButton = tools.UITools.getButton(0,0,300,50,"Play online", playMulti);
 		multiButton.screenCenter(flixel.util.FlxAxes.X);
 		multiButton.y = 600;
 		add(multiButton);

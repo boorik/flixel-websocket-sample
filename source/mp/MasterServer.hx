@@ -15,14 +15,14 @@ using Lambda;
 
 class MasterServer {
 	static function main() {
-		Sys.println("Master server, built at " + BuildInfo.getBuildDate());
+		log("Master server STARTED, built at " + BuildInfo.getBuildDate());
 
 		// websocket server
 		var clients:Array<Client> = [];
 		var games:Array<GameDesc> = [];
 		var world = new World();
 		var port = 8888;
-		var ws = WebSocketServer.create('0.0.0.0',9999,5000,true);
+		var ws = WebSocketServer.create('0.0.0.0',9999,500, false);
 		var cpt = 0;
 		while (true) {
 			try{
@@ -41,7 +41,7 @@ class MasterServer {
 					};
 					websocket.onerror = function(msg:String)
 					{
-						var host = cast(websocket,WebSocketGeneric).host;
+						var host = cast(websocket,WebSocketGeneric).socket.peer().host;
 						var date = Date.now();
     					var str = DateTools.format(date,"%Y-%m-%d %H:%M:%S");
 						log('${host} $msg');
@@ -52,10 +52,11 @@ class MasterServer {
 							var command:MasterCommand = Unserializer.run(msg);
 							switch command {
 								case Register(name, playerNumber, maxPlayer):
-									log('${websocket.host} register a game');
+									var peer = cast(websocket,WebSocketGeneric).socket.peer().host.toString();
+									log('$peer register a game');
 									client.game = {
 										name:name,
-										host:websocket.host,
+										host:peer,
 										port:8888,
 										playerNumber:playerNumber,
 										maxPlayer:maxPlayer,
