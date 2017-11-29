@@ -113,6 +113,7 @@ class PlayState extends FlxState
 			}
 
 			// update camera
+			/*
 			var scale = player.size / 40;
 			
 			if(FlxG.camera.zoom != scale)
@@ -122,6 +123,7 @@ class PlayState extends FlxState
 				if(s!=null)
 					flixel.tweens.FlxTween.tween(s.scale,{x:scale, y:scale},0.5);
 			}
+			*/
 			
 		}
 
@@ -131,15 +133,18 @@ class PlayState extends FlxState
 			{
 				trace(object);
 				var s:FlxSprite = cast recycle(FlxSprite);
-				s.makeGraphic(Std.int(object.size), Std.int(object.size), FlxColor.fromInt(object.color + 0xFF000000));
-				s.setPosition(object.x, object.y);
-				add(s);
-				sprites.set(object.id,s);
 				if(object.id == id)
 				{
 					trace("PLAYER FOUND");
+					s.makeGraphic(Std.int(object.size), Std.int(object.size), FlxColor.RED);
 					FlxG.camera.follow(s);
-				}
+
+				}else
+					s.makeGraphic(Std.int(object.size), Std.int(object.size), FlxColor.fromInt(object.color + 0xFF000000));
+				s.setPosition(object.x, object.y);
+				add(s);
+				sprites.set(object.id,s);
+
 			}
 			else
 			{

@@ -31,7 +31,15 @@ class ServerBrowserState extends FlxState
             ws.sendString(haxe.Serializer.run(List));
         }
         ws.onmessageString = function(msg:String){
-            var masterMessage:MasterMessage = haxe.Unserializer.run(msg);
+            var masterMessage:MasterMessage;
+            try{
+                masterMessage = haxe.Unserializer.run(msg);
+            }
+            catch(e:Dynamic)
+            {
+                log('ERROR : malformed message : $msg');
+                return;
+            }
             switch(masterMessage)
             {
                 case GList(list):
@@ -57,6 +65,8 @@ class ServerBrowserState extends FlxState
                         posY += 40;
 
                     }
+                default :
+                    log('not supposed to receive this message type : $masterMessage');
             }
         };
 	}
