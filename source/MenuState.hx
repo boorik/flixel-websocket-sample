@@ -39,11 +39,12 @@ class MenuState extends FlxState
 
 	override public function update(elapsed:Float):Void
 	{
-
+		#if !web
 		if(FlxG.keys.justPressed.ESCAPE)
 		{
 			Sys.exit(0);
 		}
+		#end
 		super.update(elapsed);
 	}
 }

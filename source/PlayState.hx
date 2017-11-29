@@ -12,11 +12,13 @@ import flixel.util.FlxColor;
 using flixel.util.FlxSpriteUtil;
 
 import game.*;
+import game.Object;
 using Lambda;
 
+import haxe.*;
 import haxe.ds.IntMap;
-import haxe.Serializer;
-import haxe.Unserializer;
+// import haxe.Serializer;
+// import haxe.Unserializer;
 import mp.Command;
 import mp.Message;
 
@@ -30,8 +32,18 @@ class PlayState extends FlxState
 	var ws:haxe.net.WebSocket;
 	var sprites:IntMap<FlxSprite>;
 
+	//debug var
+	var worldUpdateTime:Float;
+	var worldTreat:Float;
+	var stateUpdate:Float;
+
 	override public function create():Void
 	{
+		//debug
+		FlxG.watch.add(this,'worldUpdateTime');
+		FlxG.watch.add(this,'worldTreat');
+		FlxG.watch.add(this,'stateUpdate');
+
 		trace("built at " + BuildInfo.getBuildDate());
 
 		sprites = new IntMap<FlxSprite>();
@@ -67,6 +79,7 @@ class PlayState extends FlxState
 
 	override public function update(elapsed:Float):Void
 	{
+		var su = Timer.stamp();
 		if(Globals.online)
 		{
 			ws.process();
@@ -74,7 +87,9 @@ class PlayState extends FlxState
 		}
 		else
 		{
+			var b = Timer.stamp();
 			state = world.update();
+			worldUpdateTime = Timer.stamp() - b;
 		}
 
 		// handle move
@@ -113,26 +128,21 @@ class PlayState extends FlxState
 			}
 
 			// update camera
-			/*
 			var scale = player.size / 40;
 			
 			if(FlxG.camera.zoom != scale)
 			{
-				flixel.tweens.FlxTween.tween(FlxG.camera, {zoom: 1/scale},.5);
-				var s:FlxSprite = sprites.get(id);
-				if(s!=null)
-					flixel.tweens.FlxTween.tween(s.scale,{x:scale, y:scale},0.5);
+				flixel.tweens.FlxTween.tween(FlxG.camera, {zoom: 1/scale},.5);				
 			}
-			*/
-			
 		}
-
+		var bo = Timer.stamp();
 		for(object in state.objects) 
 		{
+			var s:FlxSprite;
 			if(!sprites.exists(object.id))
 			{
 				trace(object);
-				var s:FlxSprite = cast recycle(FlxSprite);
+				s = cast recycle(FlxSprite);
 				if(object.id == id)
 				{
 					trace("PLAYER FOUND");
@@ -148,11 +158,19 @@ class PlayState extends FlxState
 			}
 			else
 			{
-				var s:FlxSprite = sprites.get(object.id);
+				s = sprites.get(object.id);
 				s.setPosition(object.x, object.y);
 				flixel.tweens.FlxTween.tween(s,{x:object.x,y:object.y});
 			}
+
+			if(object.type == game.ObjectType.Player || object.type == game.ObjectType.Ai)
+			{
+				var scale = object.size / 40;
+				if(s.scale.x != scale)
+					flixel.tweens.FlxTween.tween(s.scale,{x:scale, y:scale},0.5);
+			}
 		}
+		worldTreat = Timer.stamp()-bo;
 		for(object in state.removed)
 		{
 			if(sprites.exists(object.id))
@@ -173,6 +191,7 @@ class PlayState extends FlxState
 		}
 
 		super.update(elapsed);
+		stateUpdate = Timer.stamp() - su;
 	}
 
 	override public function destroy()

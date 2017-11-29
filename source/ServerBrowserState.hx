@@ -91,10 +91,12 @@ class ServerBrowserState extends FlxState
 	override public function update(elapsed:Float):Void
 	{
         ws.process();
+        #if !web
 		if(FlxG.keys.justPressed.ESCAPE)
 		{
             Sys.exit(0);
 		}
+        #end
 		super.update(elapsed);
 	}
 }
