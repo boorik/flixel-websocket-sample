@@ -49,7 +49,7 @@ class PlayState extends FlxState
 		sprites = new IntMap<FlxSprite>();
 		if(Globals.online)
 		{
-			ws = haxe.net.WebSocket.create("ws://127.0.0.1:8888");
+			ws = haxe.net.WebSocket.create('ws://${Globals.game.host}:${Globals.game.port}');
 			ws.onopen = function() ws.sendString(Serializer.run(Join));
 			ws.onmessageString = function(msg) {
 				var msg:Message = Unserializer.run(msg);
