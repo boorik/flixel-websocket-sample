@@ -7,4 +7,5 @@ enum Message {
 	Joined(id:Int);
 	Full;
 	State(state:GameState);
+	Pong;
 }

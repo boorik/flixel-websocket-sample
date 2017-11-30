@@ -30,6 +30,8 @@ class World {
 
 	public inline function remove(object:Object) {
 		objects.remove(object);
+		if(object.type == Player)
+			playerNumber--;
 	}
 
 	public function createPlayer() {

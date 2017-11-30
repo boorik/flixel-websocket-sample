@@ -30,8 +30,10 @@ class PlayState extends FlxState
 	var id:Null<Int> = null;
 	var touched:Bool;
 	var ws:haxe.net.WebSocket;
+	var wsError = false;
 	var sprites:IntMap<FlxSprite>;
-
+	var statusText:FlxText;
+	
 	//debug var
 	var worldUpdateTime:Float;
 	var worldTreat:Float;
@@ -46,10 +48,21 @@ class PlayState extends FlxState
 
 		trace("built at " + BuildInfo.getBuildDate());
 
+		statusText = new FlxText(0,0,300,"Connecting, please wait...");
+		statusText.setFormat(20,flixel.util.FlxColor.WHITE);
+		statusText.screenCenter();
+		add(statusText);
+
 		sprites = new IntMap<FlxSprite>();
 		if(Globals.online)
 		{
-			ws = haxe.net.WebSocket.create('ws://${Globals.game.host}:${Globals.game.port}');
+			try{
+				ws = haxe.net.WebSocket.create('ws://${Globals.game.host}:${Globals.game.port}');
+			}
+			catch(e:Dynamic)
+			{
+				Globals.online = false;
+			}
 			ws.onopen = function() ws.sendString(Serializer.run(Join));
 			ws.onmessageString = function(msg) {
 				var msg:Message = Unserializer.run(msg);
@@ -61,10 +74,13 @@ class PlayState extends FlxState
 						trace('Unable to join, the game is full');
 					case State(state): 
 						this.state = state;
+					default:
+						trace('not supposed to get $msg');
 				}
 			}
 			ws.onerror = function(msg:String){
 				trace('Network error : $msg');
+				showServerUnreachable();
 			}
 		}
 		else
@@ -73,17 +89,38 @@ class PlayState extends FlxState
 			id = world.createPlayer().id;
 		}
 		super.create();
+	}
 
-
+	function showServerUnreachable()
+	{
+		statusText.text = "Server unreachable : Server is down, or port is not open. If you are running the server make sure that your router is well configured.";
+		var backButton = tools.UITools.getButton(statusText.x,statusText.y+statusText.height,statusText.width,40,"Back",exit);
+		add(backButton);
 	}
 
 	override public function update(elapsed:Float):Void
 	{
+		if(FlxG.keys.justPressed.ESCAPE)
+			exit();
+		
 		var su = Timer.stamp();
 		if(Globals.online)
 		{
-			ws.process();
-			if(state == null) return; // not ready
+			if(!wsError)
+			{
+				try{
+					ws.process();
+				}catch(e:Dynamic)
+				{
+					trace(e);
+					wsError = true;
+				}
+			}
+			if(state == null)// not ready
+			{
+				super.update(elapsed);
+				return;
+			}  
 		}
 		else
 		{
@@ -185,13 +222,13 @@ class PlayState extends FlxState
 			}
 		}
 
-		if(FlxG.keys.justPressed.ESCAPE)
-		{
-			FlxG.switchState(new MenuState());
-		}
-
 		super.update(elapsed);
 		stateUpdate = Timer.stamp() - su;
+	}
+
+	function exit()
+	{
+		FlxG.switchState(new MenuState());
 	}
 
 	override public function destroy()

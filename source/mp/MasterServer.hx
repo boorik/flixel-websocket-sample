@@ -15,7 +15,7 @@ using Lambda;
 
 class MasterServer {
 	static function main() {
-		log("Master server STARTED, built at " + BuildInfo.getBuildDate());
+		log("MASTER SERVER STARTED\nbuilt at " + BuildInfo.getBuildDate());
 
 		// websocket server
 		var clients:Array<Client> = [];
@@ -49,7 +49,14 @@ class MasterServer {
 
 					websocket.onmessageString = function(msg:String)
 						{
-							var command:MasterCommand = Unserializer.run(msg);
+							var command:MasterCommand;
+							try{
+							command = cast(Unserializer.run(msg),MasterCommand);
+							}catch(e:Dynamic){
+								log('malformed message : $msg');
+								log(Std.string(e));
+								return;
+							}
 							switch command {
 								case Register(name, playerNumber, maxPlayer):
 									var peer = cast(websocket,WebSocketGeneric).socket.peer().host.toString();
@@ -76,6 +83,9 @@ class MasterServer {
 								case List:
 									var msg = Serializer.run(GList(games));
 									client.connection.sendString(msg);
+
+								default :
+									log('ERROR : unexpected command : $command');
 							}
 						};
 					clients.push(client);

@@ -19,7 +19,6 @@ class GameServer {
 
 		var masterRefreshRate = 5.0; //refresh master server every 5 sec
 
-		// websocket server
 		var clients:Array<Client> = [];
 		var world = new World();
 		var port = 8888;
@@ -28,7 +27,7 @@ class GameServer {
 		var ws = WebSocketServer.create('0.0.0.0',8888,5000,true);
 
 		//master server connection
-		var msc = WebSocket.create('ws://pony.boorik.com:9999');
+		var msc = WebSocket.create('ws://games.boorik.com:9999');
 		var masterUpdateTime = .0;
 		var mscError = false;
 
@@ -137,6 +136,10 @@ class GameServer {
 
 								case StopMove:
 									if(client.player != null) client.player.speed = 0;
+								
+								case Ping:
+									var msg = Serializer.run(Pong);
+									client.connection.sendString(msg);
 							}
 						};
 					clients.push(client);

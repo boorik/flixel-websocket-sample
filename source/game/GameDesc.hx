@@ -1,5 +1,6 @@
 package game;
 
+@:keep
 typedef GameDesc =
 {
     var name:String;

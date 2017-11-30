@@ -1,6 +1,7 @@
 package mp;
 
 // sent from client to server
+@:keep
 enum MasterCommand
 {
 	List;
