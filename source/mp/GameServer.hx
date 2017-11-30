@@ -15,7 +15,7 @@ using Lambda;
 
 class GameServer {
 	static function main() {
-		Sys.println("built at " + BuildInfo.getBuildDate());
+		log("GAME SERVER STARTED\nbuilt at " + BuildInfo.getBuildDate());
 
 		var masterRefreshRate = 5.0; //refresh master server every 5 sec
 
@@ -30,7 +30,6 @@ class GameServer {
 		//master server connection
 		var msc = WebSocket.create('ws://pony.boorik.com:9999');
 		var masterUpdateTime = .0;
-		var running = .0;
 		var mscError = false;
 
 		msc.onopen = function(){
@@ -156,9 +155,11 @@ class GameServer {
 				Sys.sleep(0.032);
 
 				//keep master server in touch
-				if(masterUpdateTime != .0 && (Timer.stamp() - masterUpdateTime > masterRefreshRate))
+				var elapsed = Timer.stamp() - masterUpdateTime;
+				if(masterUpdateTime != .0 && (elapsed > masterRefreshRate))
 				{
-					masterUpdateTime = .0;
+					//log("sending game status update...");
+					masterUpdateTime = Timer.stamp();
 					msc.sendString(Serializer.run(Update(world.playerNumber, world.maxPlayer)));
 				}
 

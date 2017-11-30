@@ -23,10 +23,12 @@ class ServerBrowserState extends FlxState
 	{
 		super.create();
 
+        FlxG.camera.bgColor = FlxColor.BLACK;
+
         statusText = new FlxText(0,0,FlxG.width,"Connecting to master server...");
         statusText.setFormat(20,flixel.util.FlxColor.WHITE);
         add(statusText);
-        ws = WebSocket.create('ws://pony.boorik.com:9999');
+        ws = WebSocket.create('ws://pony.boorik.com:9999',true);
         ws.onopen = function(){
             log("getting game list...");
             ws.sendString(haxe.Serializer.run(List));
@@ -57,6 +59,7 @@ class ServerBrowserState extends FlxState
                             FlxG.switchState(new PlayState());
                         });
                         gameButton.screenCenter(flixel.util.FlxAxes.X);
+                        gameButton.y = posY;
                         add(gameButton);
                         posY += 60;
 
