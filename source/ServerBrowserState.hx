@@ -49,7 +49,7 @@ class ServerBrowserState extends FlxState
                     for(g in list)
                     {
                         log(Std.string(g));
-                        var gameButton = tools.UITools.getButton(0,posY,400,50,'${g.name} ${g.playerNumber}/${g.maxPlayer} , latency :', function(){
+                        var gameButton = tools.UITools.getButton(0,posY,500,50,'${g.name} ${g.playerNumber}/${g.maxPlayer} , latency :', function(){
                             Globals.online = true;
                             Globals.game = g;
                             FlxG.switchState(new PlayState());
@@ -59,17 +59,16 @@ class ServerBrowserState extends FlxState
                         posY += 60;
 
                         //ping request
-                        /*
                         var ping:Float;
-                        ws = WebSocket.create('ws://${g.host}:{g.port}',true);
-                        ws.onopen = function(){
+                        var pingws = WebSocket.create('ws://${g.host}:${g.port}',true);
+                        pingws.onopen = function(){
                             ping = Timer.stamp();
-                            ws.sendString(haxe.Serializer.run(Command.Ping));
+                            pingws.sendString(haxe.Serializer.run(Command.Ping));
                         }
-                        ws.onerror = function (msg:String){
+                        pingws.onerror = function (msg:String){
                             log('ERROR : Unable to communicate with ${g.host}');
                         };
-                        ws.onmessageString = function(msg:String){
+                        pingws.onmessageString = function(msg:String){
                             var message:Message;
                             try{
                                 message = haxe.Unserializer.run(msg);
@@ -84,11 +83,12 @@ class ServerBrowserState extends FlxState
                                 case Pong :
                                     var pong = Std.int((Timer.stamp() - ping)*1000);
                                     gameButton.label.text += Std.string(pong);
+                                    pingws.close();
                                 default :
                                     log('not supposed to receive this message type : $masterMessage');
                             }
                         }
-                        */
+                        
                     }
                 default :
                     log('not supposed to receive this message type : $masterMessage');
