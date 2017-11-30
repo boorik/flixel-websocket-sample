@@ -17,15 +17,12 @@ class MenuState extends FlxState
 	{
 		super.create();
 
-		var soloButton = tools.UITools.getButton(0,0,300,50,"Play solo", playSolo);
+		var soloButton = tools.UITools.getButton(0, FlxG.height - 110, 300, 50, "Play solo", playSolo);
 		soloButton.screenCenter(flixel.util.FlxAxes.X);
-		soloButton.y = 500;
 		add(soloButton);
-		trace(soloButton.label.y);
 
-		var multiButton = tools.UITools.getButton(0,0,300,50,"Play online", playMulti);
+		var multiButton = tools.UITools.getButton(0,FlxG.height - 55, 300, 50, "Play online", playMulti);
 		multiButton.screenCenter(flixel.util.FlxAxes.X);
-		multiButton.y = 600;
 		add(multiButton);
 	}
 

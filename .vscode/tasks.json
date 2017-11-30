@@ -59,6 +59,7 @@
         },
         {
             "taskName": "html5 debug",
+            "isBuildCommand": true,
             "suppressTaskName": true,
             "args": ["html5", "-Ddebug"],
             "problemMatcher": {
@@ -131,7 +132,6 @@
         },
         {
             "taskName": "neko debug -Dnext",
-            "isBuildCommand": true,
             "suppressTaskName": true,
             "args": ["neko", "-Ddebug", "-Dnext"],
             "problemMatcher": {

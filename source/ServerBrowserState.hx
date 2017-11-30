@@ -53,13 +53,12 @@ class ServerBrowserState extends FlxState
                     for(g in list)
                     {
                         log(Std.string(g));
-                        var gameButton = tools.UITools.getButton(0,posY,300,50,'${g.name} ${g.playerNumber}/${g.maxPlayer}', function(){
+                        var gameButton = tools.UITools.getButton(0,posY,400,50,'${g.name} ${g.playerNumber}/${g.maxPlayer}', function(){
                             Globals.online = true;
                             Globals.game = g;
                             FlxG.switchState(new PlayState());
                         });
                         gameButton.screenCenter(flixel.util.FlxAxes.X);
-                        gameButton.y = posY;
                         add(gameButton);
                         posY += 60;
 
@@ -68,6 +67,11 @@ class ServerBrowserState extends FlxState
                     log('not supposed to receive this message type : $masterMessage');
             }
         };
+        log(Std.string(FlxG.camera.height));
+        var backButton = tools.UITools.getButton(10, FlxG.height - 50, 200, 40, "Back to title",function(){
+            FlxG.switchState(new MenuState());
+        });
+        add(backButton);
 	}
     
     override public function destroy()
