@@ -15,25 +15,48 @@ using Lambda;
 
 class GameServer {
 	static function main() {
+		
+		//default values
+		var port = 8888;
+		var serverName = "Ludum dare";
+		var masterAdress = "games.boorik.com";
+		var masterPort = 9999;
+		
+		var args = Sys.args();
+		if (args.length > 4)
+		{
+			Sys.println('args: [port] [masteradress] [masterport]');
+			Sys.exit(1);
+		}
+		if(args.length > 0)
+			port = Std.parseInt(args[0]);
+		if (args.length > 1)
+			serverName = args[1];
+		if(args.length > 2)
+			masterAdress = args[2];
+		if (args.length > 3)
+			masterPort = Std.parseInt(args[3]);
+	
+		
 		log("GAME SERVER STARTED\nbuilt at " + BuildInfo.getBuildDate());
 
 		var masterRefreshRate = 5.0; //refresh master server every 5 sec
 
 		var clients:Array<Client> = [];
 		var world = new World();
-		var port = 8888;
+
 		var cpt = 0;
 		//game server sockets
-		var ws = WebSocketServer.create('0.0.0.0',8888,5000,true);
+		var ws = WebSocketServer.create('0.0.0.0', port, 5000, true);
 
 		//master server connection
-		var msc = WebSocket.create('ws://games.boorik.com:9999');
+		var msc = WebSocket.create('ws://$masterAdress:$masterPort');
 		var masterUpdateTime = .0;
 		var mscError = false;
 
 		msc.onopen = function(){
 			log('registering the game');
-			msc.sendString(Serializer.run(Register("test game", 0, world.maxPlayer)));
+			msc.sendString(Serializer.run(Register(serverName, port, 0, world.maxPlayer)));
 		}
 
 		msc.onerror = function(msg:String){
@@ -138,8 +161,10 @@ class GameServer {
 									if(client.player != null) client.player.speed = 0;
 								
 								case Ping:
-									var msg = Serializer.run(Pong);
-									client.connection.sendString(msg);
+									log("pong");
+									var m = Serializer.run(Message.Pong);
+									trace(m);
+									client.connection.sendString(m);
 							}
 						};
 					clients.push(client);
@@ -183,10 +208,15 @@ class GameServer {
 
 					// broadcast the game state
 					var msg = Serializer.run(State(state));
-					for(client in clients)
-						try {
-							client.connection.sendString(msg);
-						} catch (e:Dynamic) {}
+					for (client in clients)
+					{
+						if (client.player != null)
+						{
+							try {
+								client.connection.sendString(msg);
+							} catch (e:Dynamic) {}
+						}
+					}
 				//}
 			}
 			catch (e:Dynamic) {

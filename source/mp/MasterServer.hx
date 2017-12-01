@@ -33,7 +33,7 @@ class MasterServer {
 					var client = new Client(websocket);
 					websocket.onopen = function(){log('hello client');};
 					websocket.onclose = function() {
-						log('server disconnected : ${client.game}');
+						log('client disconnected');
 						if(client.game != null)
 							games.remove(client.game);
 						client.game = null;
@@ -58,13 +58,13 @@ class MasterServer {
 								return;
 							}
 							switch command {
-								case Register(name, playerNumber, maxPlayer):
+								case Register(name, port, playerNumber, maxPlayer):
 									var peer = cast(websocket,WebSocketGeneric).socket.peer().host.toString();
 									log('$peer register a game');
 									client.game = {
 										name:name,
 										host:peer,
-										port:8888,
+										port:port,
 										playerNumber:playerNumber,
 										maxPlayer:maxPlayer,
 										lastUpdateTime:Timer.stamp()

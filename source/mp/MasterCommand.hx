@@ -5,6 +5,6 @@ package mp;
 enum MasterCommand
 {
 	List;
-	Register(name:String,playerNumber:Int,maxPlayer:Int);
+	Register(name:String, port:Int, playerNumber:Int, maxPlayer:Int);
 	Update(playerNumber:Int,maxPlayer:Int);
 }
